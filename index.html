@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>學測分數換算與大學一階篩選查詢（骨架版）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page">
+    <!-- 上方：輸入與結果（在桌機上會跑到左邊） -->
+    <section class="top-panel">
+      <!-- 黃色輸入區 -->
+      <div class="card input-card">
+        <h2>基本資料輸入</h2>
+
+        <div class="form-row">
+          <label for="examYear">考試年度（學測）：</label>
+          <input id="examYear" type="number" placeholder="例如 114" />
+        </div>
+
+        <div class="form-row">
+          <span>欲換算與查詢的一階年度：</span>
+        </div>
+        <div class="form-row">
+          <label for="targetYear0">年度 1：</label>
+          <select id="targetYear0" class="targetYear"></select>
+        </div>
+        <div class="form-row">
+          <label for="targetYear1">年度 2：</label>
+          <select id="targetYear1" class="targetYear"></select>
+        </div>
+        <div class="form-row">
+          <label for="targetYear2">年度 3：</label>
+          <select id="targetYear2" class="targetYear"></select>
+        </div>
+
+        <hr />
+
+        <div class="form-row">
+          <label for="collegeSelect">欲查詢學校：</label>
+          <select id="collegeSelect"></select>
+        </div>
+
+        <button id="applyBtn">套用年度與學校設定</button>
+      </div>
+
+      <!-- 綠色結果區：目前只做標題動態更新，換算邏輯之後再加 -->
+      <div class="card result-card">
+        <h2>級分換算與一階門檻比較（預留區）</h2>
+
+        <table class="result-table">
+          <thead>
+            <tr>
+              <th id="headerExamYear">考試年度：尚未設定</th>
+              <th id="headerTargetYear0">換算年度 1：尚未設定</th>
+              <th id="headerTargetYear1">換算年度 2：尚未設定</th>
+              <th id="headerTargetYear2">換算年度 3：尚未設定</th>
+            </tr>
+          </thead>
+          <tbody id="convertResultBody">
+            <tr>
+              <td colspan="4" class="placeholder">
+                這裡將來會放「各年度換算後的級分與是否達到一階門檻」的詳細表格。
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 下方：各年度篩選一覽表（在桌機上會跑到右邊） -->
+    <section class="bottom-panel">
+      <div class="card sieve-card">
+        <h2>大學申請一階篩選標準查詢</h2>
+
+        <p class="hint">
+          先在左側（或上方）的輸入區選好「考試年度、欲查詢年度、學校」，再點選下方的年度按鈕即可載入官方篩選一覽表。
+        </p>
+
+        <!-- 年度 tabs -->
+        <div class="year-tabs">
+          <button class="year-tab" data-year-slot="0" disabled>年度 1</button>
+          <button class="year-tab" data-year-slot="1" disabled>年度 2</button>
+          <button class="year-tab" data-year-slot="2" disabled>年度 3</button>
+        </div>
+
+        <!-- 顯示篩選一覽表的 iframe -->
+        <div class="frame-wrapper">
+          <iframe id="sieveFrame" title="大學申請一階篩選一覽表預覽區"></iframe>
+        </div>
+
+        <!-- 備用按鈕：另開新分頁 -->
+        <div class="open-new-tab-row">
+          <button id="openInNewTabBtn" disabled>在新分頁開啟目前年度之官方篩選一覽表</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="colleges.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
