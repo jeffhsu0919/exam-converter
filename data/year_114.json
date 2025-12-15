@@ -33,4 +33,20 @@
     { "score": 11, "cum_pct": 0.69 },
     { "score": 10, "cum_pct": 0.89 }
   ]
-}
+ "社會": [
+    { "score": 15, "cum_pct": 0.08 },
+    { "score": 14, "cum_pct": 0.18 },
+    { "score": 13, "cum_pct": 0.32 },
+    { "score": 12, "cum_pct": 0.48 },
+    { "score": 11, "cum_pct": 0.68 },
+    { "score": 10, "cum_pct": 0.88 }
+  ],
+ "自然": [
+    { "score": 15, "cum_pct": 0.08 },
+    { "score": 14, "cum_pct": 0.18 },
+    { "score": 13, "cum_pct": 0.32 },
+    { "score": 12, "cum_pct": 0.48 },
+    { "score": 11, "cum_pct": 0.68 },
+    { "score": 10, "cum_pct": 0.88 }
+  ],
+ }
