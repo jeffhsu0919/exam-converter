@@ -210,10 +210,45 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // 按下「套用」按鈕：只是強制刷新一次（將來可以在這裡觸發級分換算）
-  applyBtn.addEventListener("click", () => {
-    updateHeaders();
-    alert("已套用年度與學校設定（目前為骨架版，尚未進行級分換算計算）");
-  });
+ applyBtn.addEventListener("click", async () => {
+  updateHeaders();
+
+  const examYear = Number(examYearInput.value);
+  const y0 = Number(document.getElementById("targetYear0").value); // 先示範年度1
+  const rawChinese = Number(document.getElementById("scoreChinese").value);
+
+  if (!examYear || !y0) {
+    alert("請先選擇考試年度與「年度1」");
+    return;
+  }
+  if (Number.isNaN(rawChinese)) {
+    alert("請輸入國文級分（示範用）");
+    return;
+  }
+
+  try {
+    const conv = await convertSubjectScore(examYear, y0, "國文", rawChinese);
+
+    const tbody = document.getElementById("convertResultBody");
+    tbody.innerHTML = "";
+
+    if (!conv) {
+      tbody.innerHTML = `<tr><td colspan="4">找不到國文級分 ${rawChinese} 的對應百分比（假資料表沒有這個級分）</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = `
+      <tr>
+        <td>國文</td>
+        <td>${examYear}：${rawChinese}</td>
+        <td>${conv.toYear}：${conv.convertedScore}</td>
+        <td>百分比：${conv.percentile}</td>
+      </tr>
+    `;
+  } catch (err) {
+    alert("換算失敗：" + err.message);
+  }
+});
 
   // 另開新分頁按鈕
   openInNewTabBtn.addEventListener("click", () => {
@@ -232,3 +267,4 @@ document.addEventListener("DOMContentLoaded", () => {
   // 第一次載入時先更新一次標題（讓表頭是乾淨的）
   updateHeaders();
 });
+
