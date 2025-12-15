@@ -1,0 +1,13 @@
+{
+  "year": 114,
+  "subjects": {
+    "國文": [
+      { "score": 15, "cum_pct": 0.10 },
+      { "score": 14, "cum_pct": 0.20 },
+      { "score": 13, "cum_pct": 0.35 },
+      { "score": 12, "cum_pct": 0.50 },
+      { "score": 11, "cum_pct": 0.70 },
+      { "score": 10, "cum_pct": 0.90 }
+    ]
+  }
+}
