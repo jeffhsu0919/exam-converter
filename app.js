@@ -210,57 +210,65 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // 按下「套用」按鈕：只是強制刷新一次（將來可以在這裡觸發級分換算）
- applyBtn.addEventListener("click", async () => {
+applyBtn.addEventListener("click", async () => {
   updateHeaders();
 
   const examYear = Number(examYearInput.value);
   const y0 = Number(document.getElementById("targetYear0").value);
-  const y1 = Number(document.getElementById("targetYear1").value);
-  const y2 = Number(document.getElementById("targetYear2").value);
 
-  const rawChinese = Number(document.getElementById("scoreChinese").value);
+  const raw = {
+  "國文": Number(document.getElementById("scoreChinese").value),
+  "英文": Number(document.getElementById("scoreEnglish").value),
+  "數A": Number(document.getElementById("scoreMathA").value),
+  "數B": Number(document.getElementById("scoreMathB").value),
+  "社會": Number(document.getElementById("scoreSocial").value),
+  "自然": Number(document.getElementById("scoreScience").value)
+};
 
-  if (!examYear || Number.isNaN(rawChinese)) {
-    alert("請輸入考試年度與國文級分（示範用）");
+  if (!examYear || !y0) {
+    alert("請先選擇考試年度與「年度1」");
     return;
   }
 
-  const targets = [y0, y1, y2].filter(y => !!y); // 去掉未選的
-
-  if (targets.length === 0) {
-    alert("請至少選擇一個換算年度（年度1/2/3）");
-    return;
+  // 檢查四科都有填（你也可以改成允許只填部分科目）
+  for (const [subj, v] of Object.entries(raw)) {
+    if (Number.isNaN(v)) {
+      alert(`請輸入「${subj}」級分`);
+      return;
+    }
   }
+
+  const tbody = document.getElementById("convertResultBody");
+  tbody.innerHTML = "";
 
   try {
-    const tbody = document.getElementById("convertResultBody");
-    tbody.innerHTML = "";
+    // 逐科換算並顯示成多列
+    for (const subj of Object.keys(raw)) {
+      const conv = await convertSubjectScore(examYear, y0, subj, raw[subj]);
 
-    // 逐年換算：114->113、114->112、114->111
-    const results = [];
-    for (const y of targets) {
-      const conv = await convertSubjectScore(examYear, y, "國文", rawChinese);
-      results.push({ y, conv });
+      if (!conv) {
+        tbody.innerHTML += `
+          <tr>
+            <td>${subj}</td>
+            <td>${examYear}：${raw[subj]}</td>
+            <td>${y0}：無</td>
+            <td>累積人數百分比：-</td>
+          </tr>
+        `;
+        continue;
+      }
+
+      const pctText = (conv.percentile * 100).toFixed(1) + "%";
+
+      tbody.innerHTML += `
+        <tr>
+          <td>${subj}</td>
+          <td>${examYear}：${conv.rawScore}</td>
+          <td>${conv.toYear}：${conv.convertedScore}</td>
+          <td>累積人數百分比：${pctText}</td>
+        </tr>
+      `;
     }
-
-    // 顯示成一列（你也可以改成多列，我先用「一列」好對照）
-    const cols = results.map(r => {
-      if (!r.conv) return `${r.y}：無`;
-      return `${r.y}：${r.conv.convertedScore}`;
-    });
-
-   const pctText = results[0].conv
-  ? (results[0].conv.percentile * 100).toFixed(1) + "%"
-  : "-";
-
-    tbody.innerHTML = `
-      <tr>
-        <td>國文</td>
-        <td>${examYear}：${rawChinese}</td>
-        <td>${cols[0] || "-"}</td>
-        <td>${cols[1] || "-"} / ${cols[2] || "-"}（累積人數百分比：${pctText}）</td>
-      </tr>
-    `;
   } catch (err) {
     alert("換算失敗：" + err.message);
   }
@@ -283,5 +291,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // 第一次載入時先更新一次標題（讓表頭是乾淨的）
   updateHeaders();
 });
+
 
 
