@@ -1,0 +1,53 @@
+{
+  "year": 114,
+  "subjects": {
+    "國文": [
+      { "score": 15, "cum_pct": 0.10 },
+      { "score": 14, "cum_pct": 0.20 },
+      { "score": 13, "cum_pct": 0.35 },
+      { "score": 12, "cum_pct": 0.50 },
+      { "score": 11, "cum_pct": 0.70 },
+      { "score": 10, "cum_pct": 0.90 }
+    ],
+    "英文": [
+      { "score": 15, "cum_pct": 0.08 },
+      { "score": 14, "cum_pct": 0.18 },
+      { "score": 13, "cum_pct": 0.32 },
+      { "score": 12, "cum_pct": 0.48 },
+      { "score": 11, "cum_pct": 0.68 },
+      { "score": 10, "cum_pct": 0.88 }
+    ],
+    "數A": [
+      { "score": 15, "cum_pct": 0.12 },
+      { "score": 14, "cum_pct": 0.22 },
+      { "score": 13, "cum_pct": 0.36 },
+      { "score": 12, "cum_pct": 0.52 },
+      { "score": 11, "cum_pct": 0.72 },
+      { "score": 10, "cum_pct": 0.92 }
+    ],
+    "數B": [
+      { "score": 15, "cum_pct": 0.09 },
+      { "score": 14, "cum_pct": 0.19 },
+      { "score": 13, "cum_pct": 0.33 },
+      { "score": 12, "cum_pct": 0.49 },
+      { "score": 11, "cum_pct": 0.69 },
+      { "score": 10, "cum_pct": 0.89 }
+    ],
+    "社會": [
+      { "score": 15, "cum_pct": 0.08 },
+      { "score": 14, "cum_pct": 0.18 },
+      { "score": 13, "cum_pct": 0.32 },
+      { "score": 12, "cum_pct": 0.48 },
+      { "score": 11, "cum_pct": 0.68 },
+      { "score": 10, "cum_pct": 0.88 }
+    ],
+    "自然": [
+      { "score": 15, "cum_pct": 0.08 },
+      { "score": 14, "cum_pct": 0.18 },
+      { "score": 13, "cum_pct": 0.32 },
+      { "score": 12, "cum_pct": 0.48 },
+      { "score": 11, "cum_pct": 0.68 },
+      { "score": 10, "cum_pct": 0.88 }
+    ]
+  }
+}
