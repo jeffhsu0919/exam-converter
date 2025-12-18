@@ -6,34 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const targetYearSelects = document.querySelectorAll(".targetYear");
   const collegeSelect = document.getElementById("collegeSelect");
   const applyBtn = document.getElementById("applyBtn");
- const cardsWrap = document.getElementById("resultCards");
-cardsWrap.innerHTML = "";
-
-for (const subj of Object.keys(raw)) {
-  const perYear = [];
-
-  let pct = null;
-  for (const ty of targetYears) {
-    const conv = await convertSubjectScore(examYear, ty, subj, raw[subj]);
-    if (conv) {
-      pct = conv.percentile;
-      perYear.push(`${ty}：${conv.convertedScore}`);
-    } else {
-      perYear.push(`${ty}：無`);
-    }
-  }
-
-  const pctText = (pct !== null) ? `前 ${(pct*100).toFixed(1)}%` : "-";
-
-  cardsWrap.innerHTML += `
-    <div class="subj-card">
-      <div class="subj-title">${subj}</div>
-      <div class="subj-row"><span>原年度</span><b>${examYear}：${raw[subj]}</b></div>
-      <div class="subj-row"><span>落點</span><b>${pctText}</b></div>
-      <div class="subj-row"><span>換算</span><b>${perYear.join(" / ")}</b></div>
-    </div>
-  `;
-}
 
   const deptSelect = document.getElementById("deptSelect");
   const deptInput = document.getElementById("deptInput");
@@ -242,23 +214,27 @@ applyBtn.addEventListener("click", async () => {
   updateHeaders();
 
   const examYear = Number(examYearInput.value);
-  const y0 = Number(document.getElementById("targetYear0").value);
+
+  const targetYears = [
+    Number(document.getElementById("targetYear0").value) || null,
+    Number(document.getElementById("targetYear1").value) || null,
+    Number(document.getElementById("targetYear2").value) || null
+  ].filter(Boolean);
 
   const raw = {
-  "國文": Number(document.getElementById("scoreChinese").value),
-  "英文": Number(document.getElementById("scoreEnglish").value),
-  "數A": Number(document.getElementById("scoreMathA").value),
-  "數B": Number(document.getElementById("scoreMathB").value),
-  "社會": Number(document.getElementById("scoreSocial").value),
-  "自然": Number(document.getElementById("scoreScience").value)
-};
+    "國文": Number(document.getElementById("scoreChinese").value),
+    "英文": Number(document.getElementById("scoreEnglish").value),
+    "數A": Number(document.getElementById("scoreMathA").value),
+    "數B": Number(document.getElementById("scoreMathB").value),
+    "社會": Number(document.getElementById("scoreSocial").value),
+    "自然": Number(document.getElementById("scoreScience").value)
+  };
 
-  if (!examYear || !y0) {
-    alert("請先選擇考試年度與「年度1」");
+  if (!examYear || targetYears.length === 0) {
+    alert("請先選擇考試年度與至少一個換算年度");
     return;
   }
 
-  // 檢查四科都有填（你也可以改成允許只填部分科目）
   for (const [subj, v] of Object.entries(raw)) {
     if (Number.isNaN(v)) {
       alert(`請輸入「${subj}」級分`);
@@ -267,33 +243,54 @@ applyBtn.addEventListener("click", async () => {
   }
 
   const tbody = document.getElementById("convertResultBody");
+  const cardsWrap = document.getElementById("resultCards");
+
   tbody.innerHTML = "";
+  cardsWrap.innerHTML = "";
 
   try {
-    // 逐科換算並顯示成多列
     for (const subj of Object.keys(raw)) {
-      const conv = await convertSubjectScore(examYear, y0, subj, raw[subj]);
+      // 針對此科目，逐年度換算
+      const perYearTexts = [];
+      let pct = null;
 
-      if (!conv) {
-        tbody.innerHTML += `
-          <tr>
-            <td>${subj}</td>
-            <td>${examYear}：${raw[subj]}</td>
-            <td>${y0}：無</td>
-            <td>累積人數百分比：-</td>
-          </tr>
-        `;
-        continue;
+      for (const ty of targetYears) {
+        const conv = await convertSubjectScore(examYear, ty, subj, raw[subj]);
+        if (conv) {
+          pct = conv.percentile;
+          perYearTexts.push(`${ty}：${conv.convertedScore}`);
+        } else {
+          perYearTexts.push(`${ty}：無`);
+        }
       }
 
-      const pctText = (conv.percentile * 100).toFixed(1) + "%";
+      // 卡片用：前xx%
+      const pctText = (pct !== null) ? `前 ${(pct * 100).toFixed(1)}%` : "-";
+
+      // ===== 卡片2：每科一張卡 =====
+      cardsWrap.innerHTML += `
+        <div class="subj-card">
+          <div class="subj-title">${subj}</div>
+          <div class="subj-row"><span>原年度</span><b>${examYear}：${raw[subj]}</b></div>
+          <div class="subj-row"><span>落點</span><b>${pctText}</b></div>
+          <div class="subj-row"><span>換算</span><b>${perYearTexts.join(" / ")}</b></div>
+        </div>
+      `;
+
+      // ===== 先保留原表格：你也可以之後拿掉 =====
+      // 讓表格固定 4 欄：科目 / 原年度 / 年度1 / 落點（年度2/3 先不塞，避免破壞你表頭）
+      // 若你想把年度2/3也塞進表格，我下一步可以幫你把 table 結構一起改掉。
+      const y0 = Number(document.getElementById("targetYear0").value) || null;
+      const conv0 = y0 ? await convertSubjectScore(examYear, y0, subj, raw[subj]) : null;
+      const pctTextTable = conv0 ? (conv0.percentile * 100).toFixed(1) + "%" : "-";
+      const convScore0 = conv0 ? conv0.convertedScore : "無";
 
       tbody.innerHTML += `
         <tr>
           <td>${subj}</td>
-          <td>${examYear}：${conv.rawScore}</td>
-          <td>${conv.toYear}：${conv.convertedScore}</td>
-          <td>累積人數百分比：${pctText}</td>
+          <td>${examYear}：${raw[subj]}</td>
+          <td>${y0 ? `${y0}：${convScore0}` : "-"}</td>
+          <td>累積人數百分比：${pctTextTable}</td>
         </tr>
       `;
     }
@@ -319,6 +316,7 @@ applyBtn.addEventListener("click", async () => {
   // 第一次載入時先更新一次標題（讓表頭是乾淨的）
   updateHeaders();
 });
+
 
 
 
