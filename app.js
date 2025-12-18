@@ -6,7 +6,79 @@ document.addEventListener("DOMContentLoaded", () => {
   const targetYearSelects = document.querySelectorAll(".targetYear");
   const collegeSelect = document.getElementById("collegeSelect");
   const applyBtn = document.getElementById("applyBtn");
+// ✅ 記錄最近一次「套用」的輸入（給卡片3即時重算用）
+let lastRun = {
+  examYear: null,
+  raw: null,
+  targetYears: [],
+};
 
+const SIEVE_OPTIONS = [
+  // 單科
+  { key: "國文", parts: ["國文"] },
+  { key: "英文", parts: ["英文"] },
+  { key: "數A", parts: ["數A"] },
+  { key: "數B", parts: ["數B"] },
+  { key: "社會", parts: ["社會"] },
+  { key: "自然", parts: ["自然"] },
+
+  // 兩科
+  { key: "國英", parts: ["國文","英文"] },
+  { key: "國數A", parts: ["國文","數A"] },
+  { key: "國數B", parts: ["國文","數B"] },
+  { key: "國社", parts: ["國文","社會"] },
+  { key: "國自", parts: ["國文","自然"] },
+  { key: "英數A", parts: ["英文","數A"] },
+  { key: "英數B", parts: ["英文","數B"] },
+  { key: "英社", parts: ["英文","社會"] },
+  { key: "英自", parts: ["英文","自然"] },
+  { key: "數A數B", parts: ["數A","數B"] },
+  { key: "數A社", parts: ["數A","社會"] },
+  { key: "數A自", parts: ["數A","自然"] },
+  { key: "數B社", parts: ["數B","社會"] },
+  { key: "數B自", parts: ["數B","自然"] },
+  { key: "社自", parts: ["社會","自然"] },
+
+  // 三科
+  { key: "國英數A", parts: ["國文","英文","數A"] },
+  { key: "國英數B", parts: ["國文","英文","數B"] },
+  { key: "國英社", parts: ["國文","英文","社會"] },
+  { key: "國英自", parts: ["國文","英文","自然"] },
+  { key: "國數A數B", parts: ["國文","數A","數B"] },
+  { key: "國數A社", parts: ["國文","數A","社會"] },
+  { key: "國數A自", parts: ["國文","數A","自然"] },
+  { key: "國數B社", parts: ["國文","數B","社會"] },
+  { key: "國數B自", parts: ["國文","數B","自然"] },
+  { key: "國社自", parts: ["國文","社會","自然"] },
+  { key: "英數A數B", parts: ["英文","數A","數B"] },
+  { key: "英數A社", parts: ["英文","數A","社會"] },
+  { key: "英數A自", parts: ["英文","數A","自然"] },
+  { key: "英數B社", parts: ["英文","數B","社會"] },
+  { key: "英數B自", parts: ["英文","數B","自然"] },
+  { key: "英社自", parts: ["英文","社會","自然"] },
+
+  // 四科
+  { key: "數A數B社", parts: ["數A","數B","社會"] },
+  { key: "數A數B自", parts: ["數A","數B","自然"] },
+  { key: "數A社自", parts: ["數A","社會","自然"] },
+  { key: "數B社自", parts: ["數B","社會","自然"] },
+  { key: "國英數A數B", parts: ["國文","英文","數A","數B"] },
+  { key: "國英數A社", parts: ["國文","英文","數A","社會"] },
+  { key: "國英數A自", parts: ["國文","英文","數A","自然"] },
+  { key: "國英數B社", parts: ["國文","英文","數B","社會"] },
+  { key: "國英數B自", parts: ["國文","英文","數B","自然"] },
+  { key: "國英社自", parts: ["國文","英文","社會","自然"] },
+  { key: "國數A數B社", parts: ["國文","數A","數B","社會"] },
+  { key: "國數A數B自", parts: ["國文","數A","數B","自然"] },
+  { key: "國數A社自", parts: ["國文","數A","社會","自然"] },
+  { key: "國數B社自", parts: ["國文","數B","社會","自然"] },
+  { key: "英數A數B社", parts: ["英文","數A","數B","社會"] },
+  { key: "英數A數B自", parts: ["英文","數A","數B","自然"] },
+  { key: "英數A社自", parts: ["英文","數A","社會","自然"] },
+  { key: "英數B社自", parts: ["英文","數B","社會","自然"] },
+  { key: "數A數B社自", parts: ["數A","數B","社會","自然"] }
+];
+  
   const deptSelect = document.getElementById("deptSelect");
   const deptInput = document.getElementById("deptInput");
 
@@ -175,6 +247,193 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ====== 卡片3：一階篩選自填區 ======
+const sieveRowsWrap = document.getElementById("sieveRows");
+const addSieveRowBtn = document.getElementById("addSieveRowBtn");
+const clearSieveBtn = document.getElementById("clearSieveBtn");
+
+let sieveRowCount = 0;
+
+function getSelectedTargetYearsForRow() {
+  // 用你目前選到的年度（currentTargetYears 是字串陣列 ["113","112","111"]）
+  // 回傳可用的 slot 清單
+  const slots = [];
+  currentTargetYears.forEach((y, i) => {
+    if (y) slots.push({ slot: i, year: Number(y) });
+  });
+  return slots;
+}
+
+function buildSieveOptionSelectHtml() {
+  const opts = ['<option value="">（選擇篩選項目）</option>'];
+  for (const it of SIEVE_OPTIONS) {
+    opts.push(`<option value="${it.key}">${it.key}</option>`);
+  }
+  return opts.join("");
+}
+
+function buildYearSelectHtml() {
+  const slots = getSelectedTargetYearsForRow();
+  if (slots.length === 0) {
+    return `<option value="">（先選年度1/2/3）</option>`;
+  }
+  return [
+    `<option value="">（選擇年度）</option>`,
+    ...slots.map(s => `<option value="${s.slot}">${s.year}（年度${s.slot+1}）</option>`)
+  ].join("");
+}
+
+function addSieveRow() {
+  if (sieveRowCount >= 6) return;
+  sieveRowCount++;
+
+  const row = document.createElement("div");
+  row.className = "sieve-row";
+  row.dataset.idx = String(sieveRowCount);
+
+  row.innerHTML = `
+    <select class="sieve-year-slot">
+      ${buildYearSelectHtml()}
+    </select>
+
+    <select class="sieve-criterion">
+      ${buildSieveOptionSelectHtml()}
+    </select>
+
+    <input class="sieve-cutoff" type="number" placeholder="門檻" />
+
+    <div class="sieve-my-score diff-na">-</div>
+    <div class="sieve-diff diff-na">-</div>
+
+    <button type="button" class="sieve-del btn-ghost">×</button>
+  `;
+
+  sieveRowsWrap.appendChild(row);
+
+  // 綁定事件：任何變動就重算
+  row.querySelector(".sieve-year-slot").addEventListener("change", recomputeSieveRows);
+  row.querySelector(".sieve-criterion").addEventListener("change", recomputeSieveRows);
+  row.querySelector(".sieve-cutoff").addEventListener("input", recomputeSieveRows);
+
+  row.querySelector(".sieve-del").addEventListener("click", () => {
+    row.remove();
+    sieveRowCount--;
+    recomputeSieveRows();
+  });
+
+  recomputeSieveRows();
+}
+
+function clearSieveRows() {
+  sieveRowsWrap.innerHTML = "";
+  sieveRowCount = 0;
+}
+
+// 重要：把 combo key 轉為 parts
+function findSieveParts(key) {
+  return SIEVE_OPTIONS.find(x => x.key === key)?.parts ?? null;
+}
+
+function sumRawByParts(raw, parts) {
+  let s = 0;
+  for (const p of parts) s += (raw[p] ?? 0);
+  return s;
+}
+
+// ✅ 安全呼叫：避免組合資料不存在時整個 throw
+async function safeConvert(fromYear, toYear, subjectKey, rawScore) {
+  try {
+    const conv = await convertSubjectScore(fromYear, toYear, subjectKey, rawScore);
+    return { ok: true, conv };
+  } catch (e) {
+    return { ok: false, error: e?.message || String(e) };
+  }
+}
+
+async function recomputeSieveRows() {
+  // 還沒按套用就不算
+  if (!lastRun.examYear || !lastRun.raw) {
+    // 顯示提示
+    sieveRowsWrap.querySelectorAll(".sieve-my-score, .sieve-diff").forEach(el => {
+      el.textContent = "-";
+      el.className = el.className.replace(/\bdiff-pos\b|\bdiff-neg\b/g, "").trim() + " diff-na";
+    });
+    return;
+  }
+
+  const examYear = lastRun.examYear;
+  const raw = lastRun.raw;
+
+  const slotYearMap = {};
+  currentTargetYears.forEach((y, i) => { if (y) slotYearMap[i] = Number(y); });
+
+  const rows = sieveRowsWrap.querySelectorAll(".sieve-row");
+  for (const row of rows) {
+    const slot = row.querySelector(".sieve-year-slot").value;
+    const crit = row.querySelector(".sieve-criterion").value;
+    const cutoff = Number(row.querySelector(".sieve-cutoff").value);
+
+    const myScoreEl = row.querySelector(".sieve-my-score");
+    const diffEl = row.querySelector(".sieve-diff");
+
+    // reset
+    myScoreEl.className = "sieve-my-score diff-na";
+    diffEl.className = "sieve-diff diff-na";
+    myScoreEl.textContent = "-";
+    diffEl.textContent = "-";
+
+    if (!slot || !crit) continue;
+
+    const toYear = slotYearMap[Number(slot)];
+    if (!toYear) continue;
+
+    const parts = findSieveParts(crit);
+    if (!parts) continue;
+
+    const rawScore = sumRawByParts(raw, parts);
+
+    // 單科/組合都統一走 convertSubjectScore
+    // 單科：subjectKey 就是 "國文"... OK
+    // 組合：subjectKey 是 "國英"..."數A數B社自"... 需要你之後在 JSON 補上對應統計表
+    const ret = await safeConvert(examYear, toYear, crit, rawScore);
+
+    if (!ret.ok) {
+      myScoreEl.textContent = "缺組合資料";
+      diffEl.textContent = "-";
+      continue;
+    }
+
+    const conv = ret.conv;
+    if (!conv) {
+      myScoreEl.textContent = "無";
+      diffEl.textContent = "-";
+      continue;
+    }
+
+    myScoreEl.textContent = String(conv.convertedScore);
+
+    if (!Number.isFinite(cutoff)) {
+      diffEl.textContent = "-";
+      continue;
+    }
+
+    const diff = conv.convertedScore - cutoff;
+    diffEl.textContent = (diff >= 0 ? "+" : "") + String(diff);
+    diffEl.className = "sieve-diff " + (diff >= 0 ? "diff-pos" : "diff-neg");
+  }
+
+  // 同步更新每列「年度下拉」的選項（當你改年度1/2/3時）
+  sieveRowsWrap.querySelectorAll(".sieve-year-slot").forEach(sel => {
+    const old = sel.value;
+    sel.innerHTML = buildYearSelectHtml();
+    if ([...sel.options].some(o => o.value === old)) sel.value = old;
+  });
+}
+
+// 按鈕
+if (addSieveRowBtn) addSieveRowBtn.addEventListener("click", addSieveRow);
+if (clearSieveBtn) clearSieveBtn.addEventListener("click", () => { clearSieveRows(); });
+  
   /* ---------- 事件綁定 ---------- */
 
   // 考試年度與換算年度變動時，更新標題與 tabs
@@ -230,6 +489,11 @@ applyBtn.addEventListener("click", async () => {
     "自然": Number(document.getElementById("scoreScience").value)
   };
 
+// ✅ 讓卡片3知道目前輸入
+lastRun.examYear = examYear;
+lastRun.raw = raw;
+lastRun.targetYears = currentTargetYears.map(x => x ? Number(x) : null);
+  
   if (!examYear || targetYears.length === 0) {
     alert("請先選擇考試年度與至少一個換算年度");
     return;
@@ -263,7 +527,8 @@ applyBtn.addEventListener("click", async () => {
           perYearTexts.push(`${ty}：無`);
         }
       }
-
+    recomputeSieveRows();
+      
       // 卡片用：前xx%
       const pctText = (pct !== null) ? `前 ${(pct * 100).toFixed(1)}%` : "-";
 
@@ -316,6 +581,7 @@ applyBtn.addEventListener("click", async () => {
   // 第一次載入時先更新一次標題（讓表頭是乾淨的）
   updateHeaders();
 });
+
 
 
 
