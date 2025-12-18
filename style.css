@@ -275,8 +275,10 @@ iframe {
   text-align: right;
 }
 
-/* ✅ 桌機：讓卡片3（門檻自填區）在左欄可黏住，避免捲上去就不見 */
+/* ✅ 桌機：版面優化（結果區併排 + 卡片3黏住 + 輸入區橫向化 + iframe 加高） */
 @media (min-width: 900px) {
+
+  /* 1) 結果區：卡片2 / 卡片3 併排 */
   .result-split{
     display: grid;
     grid-template-columns: 1.6fr 1fr;  /* 左大右小：卡片2 / 卡片3 */
@@ -288,30 +290,70 @@ iframe {
   .result-card{
     overflow: visible;
   }
-  
+
   .sieve-self-card{
     position: sticky;
-    top: 12px;            /* 距離視窗頂部 */
+    top: 12px;
     max-height: calc(100vh - 24px);
-    overflow: auto;       /* 內容超出時在卡片內捲 */
+    overflow: auto;
   }
 
+  /* 2) 右側 iframe：加高 */
   .frame-wrapper { height: 520px; }
 
+  /* 3) 整頁：左右排版 */
   .page {
     flex-direction: row;
     align-items: flex-start;
   }
 
-  .top-panel {
-    flex: 3;
+  .top-panel { flex: 3; }
+  .bottom-panel { flex: 2; }
+
+  /* 4) ✅ 左側黃色輸入區：改成橫向多欄（讓下方結果區往上移） */
+  .input-card{
+    display: grid;
+    grid-template-columns: 160px 140px 140px 140px 140px 140px 140px;
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 10px;
   }
 
-  .bottom-panel {
-    flex: 2;
+  /* 標題、分隔線、按鈕跨整排 */
+  .input-card h2,
+  .input-card hr,
+  .input-card #applyBtn{
+    grid-column: 1 / -1;
+  }
+
+  /* 每個 form-row 變成短小的橫向輸入單元 */
+  .input-card .form-row{
+    margin: 0;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+
+  .input-card label{
+    min-width: auto;
+    white-space: nowrap;
+  }
+
+  .input-card input[type="number"],
+  .input-card select,
+  .input-card input[type="text"]{
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* 學校/科系/自填這些比較長，跨整排避免擠爆 */
+  .input-card .form-row:has(#collegeSelect),
+  .input-card .form-row:has(#deptSelect),
+  .input-card .form-row:has(#deptInput){
+    grid-column: 1 / -1;
+  }
+
+  /* 文字提示那行也跨整排（避免擠成兩行很醜） */
+  .input-card .form-row span{
+    white-space: nowrap;
   }
 }
-
-
-
-
