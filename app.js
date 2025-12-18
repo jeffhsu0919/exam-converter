@@ -6,6 +6,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const targetYearSelects = document.querySelectorAll(".targetYear");
   const collegeSelect = document.getElementById("collegeSelect");
   const applyBtn = document.getElementById("applyBtn");
+ const cardsWrap = document.getElementById("resultCards");
+cardsWrap.innerHTML = "";
+
+for (const subj of Object.keys(raw)) {
+  const perYear = [];
+
+  let pct = null;
+  for (const ty of targetYears) {
+    const conv = await convertSubjectScore(examYear, ty, subj, raw[subj]);
+    if (conv) {
+      pct = conv.percentile;
+      perYear.push(`${ty}：${conv.convertedScore}`);
+    } else {
+      perYear.push(`${ty}：無`);
+    }
+  }
+
+  const pctText = (pct !== null) ? `前 ${(pct*100).toFixed(1)}%` : "-";
+
+  cardsWrap.innerHTML += `
+    <div class="subj-card">
+      <div class="subj-title">${subj}</div>
+      <div class="subj-row"><span>原年度</span><b>${examYear}：${raw[subj]}</b></div>
+      <div class="subj-row"><span>落點</span><b>${pctText}</b></div>
+      <div class="subj-row"><span>換算</span><b>${perYear.join(" / ")}</b></div>
+    </div>
+  `;
+}
 
   const deptSelect = document.getElementById("deptSelect");
   const deptInput = document.getElementById("deptInput");
@@ -291,6 +319,7 @@ applyBtn.addEventListener("click", async () => {
   // 第一次載入時先更新一次標題（讓表頭是乾淨的）
   updateHeaders();
 });
+
 
 
 
