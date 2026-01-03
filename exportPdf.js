@@ -14,14 +14,14 @@
       (deptSel && deptSel.selectedOptions && deptSel.selectedOptions[0])
         ? deptSel.selectedOptions[0].text.trim()
         : "";
-
+   const deptTextFromInput = deptInput ? deptInput.value.trim() : "";
    const deptTextFromSelectRaw = deptTextFromSelect;
 
 // ✅ 若選單停在「請選擇科系」或空字樣，就視為無效，改用自填
 const isPlaceholder =
   !deptTextFromSelectRaw ||
   /請選擇/.test(deptTextFromSelectRaw) ||
-  /或改用/.test(deptTextFromSelectRaw);
+ /手動輸入|自填|或改用/.test(deptTextFromSelectRaw);
 
 const deptText = (!isPlaceholder ? deptTextFromSelectRaw : "") || deptTextFromInput || "";
 
