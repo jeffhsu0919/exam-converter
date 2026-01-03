@@ -453,7 +453,7 @@ iframe {
   pointer-events:none;
   padding:6px 10px;
   border-radius:999px;
-  background:rgba(0,0,0,0.1);
+  background:rgba(255,255,255,0.85);
   font-size:0.9rem;
 }
 
@@ -502,6 +502,7 @@ iframe {
 .threshold-input {
   -moz-appearance: textfield; /* Firefox */
 }
+
 
 
 
