@@ -36,7 +36,7 @@ const deptText = (!isPlaceholder ? deptTextFromSelectRaw : "") || deptTextFromIn
     const header = document.createElement("div");
     header.className = "pdf-meta-header";
     header.innerHTML = `
-      <div class="pdf-meta-title">積分換算與一階門檻比較</div>
+      <div class="pdf-meta-title">級分換算與一階門檻比較</div>
       <div class="pdf-meta-sub">
         <span>學校：${collegeText || "（未選擇）"}</span>
         <span style="margin-left:12px;">科系：${deptText || "（未填寫）"}</span>
