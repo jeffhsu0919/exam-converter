@@ -51,30 +51,37 @@
         <div class="form-row">
           <span>欲換算與查詢的一階年度：</span>
         </div>
-        <div class="form-row">
-          <label for="targetYear0">年度 1：</label>
-          <select id="targetYear0" class="targetYear"></select>
-        </div>
-        <div class="form-row">
-          <label for="targetYear1">年度 2：</label>
-          <select id="targetYear1" class="targetYear"></select>
-        </div>
-        <div class="form-row">
-          <label for="targetYear2">年度 3：</label>
-          <select id="targetYear2" class="targetYear"></select>
-        </div>
+        <div class="form-row target-years-inline">
+  <div class="ty-group">
+    <label for="targetYear0">年度 1：</label>
+    <select id="targetYear0" class="targetYear"></select>
+  </div>
+
+  <div class="ty-group">
+    <label for="targetYear1">年度 2：</label>
+    <select id="targetYear1" class="targetYear"></select>
+  </div>
+
+  <div class="ty-group">
+    <label for="targetYear2">年度 3：</label>
+    <select id="targetYear2" class="targetYear"></select>
+  </div>
+</div>
 
         <hr />
 
-        <div class="form-row">
-          <label for="collegeSelect">欲查詢學校：</label>
-          <select id="collegeSelect"></select>
-        </div>
- 
-        <div class="form-row">
-        <label for="deptSelect">科系名稱：</label>
-        <select id="deptSelect"></select>
-        </div>
+       <div class="form-row school-dept-inline">
+  <div class="sd-group sd-school">
+    <label for="collegeSelect">欲查詢學校：</label>
+    <select id="collegeSelect"></select>
+  </div>
+
+  <div class="sd-group sd-dept">
+    <label for="deptSelect">科系名稱：</label>
+    <select id="deptSelect"></select>
+    <div class="micro-hint">科系編碼可能有所不同，請依科系名稱為準。</div>
+  </div>
+</div>
 
         <div class="form-row">
         <span style="font-size: 0.8rem; color: #64748b;">
@@ -91,8 +98,10 @@
       </div>
 
       <!-- 綠色結果區：目前只做標題動態更新，換算邏輯之後再加 -->
-      <div class="card result-card">
-       <h2>級分換算與一階門檻比較（預留區）</h2>
+      <div class="result-header">
+  <h2>級分換算與一階門檻比較（預留區）</h2>
+  <button id="exportPdfBtn" type="button">匯出 PDF</button>
+</div>
 
 <!-- ✅ 桌機用：卡片2 + 卡片3 併排 -->
 <div class="result-split">
@@ -165,8 +174,11 @@
 
         <!-- 顯示篩選一覽表的 iframe -->
         <div class="frame-wrapper">
-          <iframe id="sieveFrame" title="大學申請一階篩選一覽表預覽區"></iframe>
-        </div>
+  <div class="scroll-guide" aria-hidden="true">
+    ⇦ 左右拖動可查看完整科系表格 ⇨
+  </div>
+  <iframe id="sieveFrame" ...></iframe>
+</div>
 
         <!-- 備用按鈕：另開新分頁 -->
         <div class="open-new-tab-row">
@@ -182,6 +194,7 @@
   <script src="app.js"></script>
  </body>
 </html>
+
 
 
 
