@@ -45,6 +45,42 @@ const deptText = (!isPlaceholder ? deptTextFromSelectRaw : "") || deptTextFromIn
     return header;
   }
 
+    // ✅ 檔名片段清理：Windows 不允許字元 \ / : * ? " < > |
+   function sanitizeFilenamePart(s) {
+    return String(s || "")
+      // ✅ 移除開頭的學校代碼，如「(001)」或「001」
+      .replace(/^\s*\(?\d{3}\)?\s*/g, "")
+      // ✅ 移除開頭的科系代碼，如「001012」
+      .replace(/^\s*\d{6}\s*/g, "")
+      // ✅ Windows 不允許字元
+      .replace(/[\\\/:\*\?"<>\|]/g, "_")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  // ✅ 產生 PDF 檔名：校名_科系_學測級分換算暨一階門檻查詢_YYYYMMDD_HHMM.pdf
+  function buildPdfFileName(stamp) {
+    const { collegeText, deptText } = getCollegeDeptText();
+
+    const college = sanitizeFilenamePart(collegeText) || "未選學校";
+    const dept = sanitizeFilenamePart(deptText) || "未填科系";
+
+    const fixed = `_學測級分換算暨一階門檻查詢_${stamp}.pdf`;
+
+    // prefix = "校名_科系"
+    let prefix = `${college}_${dept}`;
+
+    // ✅ 長度限制（含副檔名）：100 字元
+    const MAX_LEN = 100;
+    const maxPrefixLen = Math.max(1, MAX_LEN - fixed.length);
+
+    if ((prefix + fixed).length > MAX_LEN) {
+      prefix = prefix.slice(0, maxPrefixLen).replace(/_+$/g, "");
+    }
+
+    return prefix + fixed;
+  }
+
   function init() {
     const btn = document.getElementById("exportPdfBtn");
     const pdfArea = document.getElementById("pdfArea"); // 我們在 index.html 新增的容器
@@ -95,7 +131,7 @@ const deptText = (!isPlaceholder ? deptTextFromSelectRaw : "") || deptTextFromIn
           String(d.getHours()).padStart(2, "0") +
           String(d.getMinutes()).padStart(2, "0");
 
-        pdf.save(`學測換算_一階門檻_${stamp}.pdf`);
+          pdf.save(buildPdfFileName(stamp));
       } catch (err) {
         console.error(err);
         alert("PDF 匯出失敗：請開啟 F12 Console 查看錯誤訊息。");
