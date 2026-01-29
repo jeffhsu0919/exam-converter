@@ -48,8 +48,6 @@ const deptText = (!isPlaceholder ? deptTextFromSelectRaw : "") || deptTextFromIn
     // ✅ 檔名片段清理：Windows 不允許字元 \ / : * ? " < > |
     function sanitizeFilenamePart(s) {
     return String(s || "")
-      // ✅ 先移除開頭「3~6碼 + 右括號 )/）」，例如：042) 、001012） 、001）
-      .replace(/^\s*\d{3,6}\s*[)\）]\s*/g, "")
       // ✅ 再移除開頭「(001)」或「（001）」這種括號包住的 3 碼
       .replace(/^\s*[\(\（]\s*\d{3}\s*[\)\）]\s*/g, "")
       // ✅ 再保底移除純 3 碼/6 碼前綴（如果資料未帶括號）
