@@ -49,10 +49,9 @@ const deptText = (!isPlaceholder ? deptTextFromSelectRaw : "") || deptTextFromIn
     function sanitizeFilenamePart(s) {
     return String(s || "")
       // ✅ 再移除開頭「(001)」或「（001）」這種括號包住的 3 碼
-      .replace(/^\s*[\(\（]\s*\d{3}\s*[\)\）]\s*/g, "")
+      .replace(/^\s*[\(\（]\s*\d{6}\s*[\)\）]\s*/g, "")
       // ✅ 再保底移除純 3 碼/6 碼前綴（如果資料未帶括號）
       .replace(/^\s*\d{6}\s*/g, "")
-      .replace(/^\s*\d{3}\s*/g, "")
       // ✅ Windows 不允許字元
       .replace(/[\\\/:\*\?"<>\|]/g, "_")
       .replace(/\s+/g, " ")
