@@ -569,7 +569,16 @@ lastRun.targetYears = currentTargetYears.map(x => x ? Number(x) : null);
 
   // ✅ 顯示各科達標（頂/前/均/後/底）
 renderBenchmarkBadges(examYear, raw);
-  
+
+  // ✅ 卡牌用：只取「考試年度」的 benchmarks（不要用換算年度）
+  let bmYear = null;
+  try {
+    const bmData = await loadBenchmarks();
+    bmYear = bmData?.[String(examYear)] ?? null;
+  } catch (e) {
+    bmYear = null;
+  }
+
   if (!examYear || targetYears.length === 0) {
     alert("請先選擇考試年度與至少一個換算年度");
     return;
@@ -608,11 +617,21 @@ renderBenchmarkBadges(examYear, raw);
       // 卡片用：前xx%
       const pctText = (pct !== null) ? `前 ${(pct * 100).toFixed(1)}%` : "-";
 
+            // ✅ 卡牌「原年度」後面的標的（只看考試年度 examYear）
+      let bmHtml = "";
+      if (bmYear) {
+        const lb = getBenchmarkLabel(raw[subj], bmYear[subj]);
+        if (lb) bmHtml = ` <span class="subj-bm">〔${lb}〕</span>`;
+      } else {
+        // 若該年度 benchmarks 未建置：用更低調的顯示（也可改成空字串）
+        bmHtml = ` <span class="subj-bm subj-bm--na">〔尚未建置〕</span>`;
+      }
+
       // ===== 卡片2：每科一張卡 =====
       cardsWrap.innerHTML += `
         <div class="subj-card">
           <div class="subj-title">${subj}</div>
-          <div class="subj-row"><span>原年度</span><b>${examYear}：${raw[subj]}</b></div>
+          <div class="subj-row"><span>原年度</span><b>${examYear}：${raw[subj]}${bmHtml}</b></div>
           <div class="subj-row"><span>落點</span><b>${pctText}</b></div>
           <div class="subj-row"><span>換算</span><b>${perYearTexts.join(" / ")}</b></div>
         </div>
@@ -657,3 +676,4 @@ renderBenchmarkBadges(examYear, raw);
   // 第一次載入時先更新一次標題（讓表頭是乾淨的）
   updateHeaders();
 });
+

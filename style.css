@@ -133,6 +133,25 @@ body {
 
 .subj-row span{ color:#64748b; }
 .subj-row b{ font-weight:700; }
+
+/* ✅ 卡牌「原年度」後方的標的顯示（小字/灰字/badge） */
+.subj-bm{
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 0.82em;
+  color: #64748b;
+  background: rgba(0,0,0,0.06);
+  border-radius: 999px;
+  padding: 2px 8px;
+  line-height: 1.1;
+  vertical-align: middle;
+}
+
+/* benchmarks 未建置時：更淡 */
+.subj-bm--na{
+  opacity: 0.65;
+}
+
 /* ✅ 卡片3：篩選順序與門檻自填 */
 .sieve-self-card{
   margin-top: 14px;
@@ -598,3 +617,4 @@ iframe {
 .threshold-input {
   -moz-appearance: textfield; /* Firefox */
 }
+
