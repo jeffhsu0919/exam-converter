@@ -255,6 +255,44 @@ h2 {
   flex-wrap: wrap;
 }
 
+/* 分數列：同一列內 badge 自動換到下一行 */
+.form-row.score-row{
+  display:inline-flex;       /* 讓每一科成為獨立小區塊 */
+  flex-direction: column;    /* 直向排列：input 上、badge 下 */
+  align-items: flex-start;   /* 左對齊 */
+  margin-right: 6px;        /* 與下一科保持距離 */
+}
+
+/* ✅ 分數輸入框：避免在 flex 下被壓縮到看不到 */
+.form-row.score-row label{
+  white-space: nowrap;           /* label 不換行，避免擠壓 */
+}
+
+.form-row.score-row input[type="number"]{
+  width: 75px;                   /* 你想要的輸入框寬度（可調） */
+  min-width: 75px;               /* 關鍵：最小寬度 */
+  text-align: left;              /* 改為靠左 */
+}
+
+/* badge：佔滿一整行（所以不吃水平空間） */
+.form-row.score-row .bm-badge{
+  width:100%;
+  display:block;
+  font-size:12px;
+  line-height:1.2;
+  opacity:0.85;
+  padding-left: 0; /* 若想對齊 input 再微調 */
+}
+
+/* 可選：用膠囊外觀 */
+.form-row.score-row .bm-badge:not(:empty){
+  display:inline-block;
+  width:auto;
+  background: rgba(0,0,0,0.06);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
 label {
   min-width: 7rem;
 }
@@ -560,11 +598,3 @@ iframe {
 .threshold-input {
   -moz-appearance: textfield; /* Firefox */
 }
-
-
-
-
-
-
-
-
