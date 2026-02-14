@@ -6,6 +6,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const targetYearSelects = document.querySelectorAll(".targetYear");
   const collegeSelect = document.getElementById("collegeSelect");
   const applyBtn = document.getElementById("applyBtn");
+  // ====== 各科標的（頂/前/均/後/底） ======
+let benchmarksCache = null;
+
+// inputId → 科目名稱（對照 benchmarks.json 的 key）
+const SUBJECT_MAP = {
+  scoreChinese: "國文",
+  scoreEnglish: "英文",
+  scoreMathA: "數A",
+  scoreMathB: "數B",
+  scoreSocial: "社會",
+  scoreScience: "自然",
+};
+
 // ✅ 記錄最近一次「套用」的輸入（給卡片3即時重算用）
 let lastRun = {
   examYear: null,
@@ -158,6 +171,66 @@ const SIEVE_OPTIONS = [
     // 更新 tabs 顯示與可用狀態
     updateYearTabs();
   }
+
+  async function loadBenchmarks() {
+  if (benchmarksCache) return benchmarksCache;
+  const resp = await fetch("data/benchmarks.json");
+  if (!resp.ok) throw new Error("找不到 benchmarks.json");
+  benchmarksCache = await resp.json();
+  return benchmarksCache;
+}
+
+function getBenchmarkLabel(score, bmForSubject) {
+  // bmForSubject 形如：{ "頂標":13, "前標":12, ... }
+  if (!Number.isFinite(score) || !bmForSubject) return "";
+
+  const top = bmForSubject["頂標"];
+  const pre = bmForSubject["前標"];
+  const avg = bmForSubject["均標"];
+  const low = bmForSubject["後標"];
+  const bot = bmForSubject["底標"];
+
+  if (Number.isFinite(top) && score >= top) return "頂標";
+  if (Number.isFinite(pre) && score >= pre) return "前標";
+  if (Number.isFinite(avg) && score >= avg) return "均標";
+  if (Number.isFinite(low) && score >= low) return "後標";
+  if (Number.isFinite(bot) && score >= bot) return "底標";
+  return "未達底標";
+}
+
+async function renderBenchmarkBadges(examYear, raw) {
+  // raw 形如：{ "國文": 12, ... }
+  // examYear 形如：114
+  // 若 benchmarks 沒該年度，全部清空
+  let data;
+  try {
+    data = await loadBenchmarks();
+  } catch (e) {
+    // 讀不到就不要讓主程式壞掉：清空 badge
+    Object.keys(SUBJECT_MAP).forEach((inputId) => {
+      const el = document.getElementById(`bm-${inputId}`);
+      if (el) el.textContent = "";
+    });
+    return;
+  }
+
+  const yearKey = String(examYear);
+  const bmYear = data?.[yearKey] ?? null;
+
+  Object.entries(SUBJECT_MAP).forEach(([inputId, subjName]) => {
+    const el = document.getElementById(`bm-${inputId}`);
+    if (!el) return;
+
+    if (!bmYear) {
+      el.textContent = "（此年度尚未建置標的）";
+      return;
+    }
+
+    const s = raw?.[subjName];
+    const label = getBenchmarkLabel(s, bmYear[subjName]);
+    el.textContent = label ? `〔${label}〕` : "";
+  });
+}
 
   /* ---------- 功能：更新年度 tabs 與 iframe 行為 ---------- */
 
@@ -493,6 +566,9 @@ applyBtn.addEventListener("click", async () => {
 lastRun.examYear = examYear;
 lastRun.raw = raw;
 lastRun.targetYears = currentTargetYears.map(x => x ? Number(x) : null);
+
+  // ✅ 顯示各科達標（頂/前/均/後/底）
+renderBenchmarkBadges(examYear, raw);
   
   if (!examYear || targetYears.length === 0) {
     alert("請先選擇考試年度與至少一個換算年度");
@@ -581,9 +657,3 @@ lastRun.targetYears = currentTargetYears.map(x => x ? Number(x) : null);
   // 第一次載入時先更新一次標題（讓表頭是乾淨的）
   updateHeaders();
 });
-
-
-
-
-
-
