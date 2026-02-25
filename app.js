@@ -1,5 +1,5 @@
 // 可選擇查詢的一階年度（之後要加年度，只要改這裡）
-const AVAILABLE_YEARS = [115, 114, 113, 112, 111];
+const AVAILABLE_YEARS = [114, 113, 112, 111];
 
 document.addEventListener("DOMContentLoaded", () => {
   const examYearInput = document.getElementById("examYear");
@@ -676,5 +676,6 @@ renderBenchmarkBadges(examYear, raw);
   // 第一次載入時先更新一次標題（讓表頭是乾淨的）
   updateHeaders();
 });
+
 
 
